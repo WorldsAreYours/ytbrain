@@ -6,7 +6,7 @@ export default function Home() {
       {/* Radial background effect */}
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
         <div className="w-[120vw] h-[120vw] bg-white rounded-full shadow-2xl opacity-60 blur-3xl" />
-      </div>
+        </div>
       <section className="relative z-10 flex flex-col items-center w-full max-w-2xl px-4">
         <h1 className="text-5xl font-extrabold text-center text-gray-900 mb-4 leading-tight">
           Get a YouTube Transcript Instantly
@@ -16,6 +16,6 @@ export default function Home() {
         </p>
         <YouTubeUrlForm />
       </section>
-    </main>
+      </main>
   );
 }

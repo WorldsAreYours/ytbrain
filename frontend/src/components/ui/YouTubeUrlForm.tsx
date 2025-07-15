@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { API_BASE_URL } from "@/lib/api";
 
 // Placeholder for a robust YouTube URL validation function
 function isValidYouTubeUrl(url: string): boolean {
@@ -13,14 +14,16 @@ export default function YouTubeUrlForm() {
   const [url, setUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [transcript, setTranscript] = useState<string[] | null>(null);
 
   // Placeholder for rate limiting/cooldown logic
   // TODO: Implement rate limiting prevention (e.g., cooldown timer, backend check, etc.)
   const [isRateLimited, setIsRateLimited] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setTranscript(null);
 
     // Validate YouTube URL
     if (!isValidYouTubeUrl(url)) {
@@ -36,12 +39,24 @@ export default function YouTubeUrlForm() {
 
     setLoading(true);
 
-    // Placeholder: API call to fetch transcript would go here
-
-    setTimeout(() => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/transcript`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        setError(data.detail || "An error occurred fetching the transcript.");
+      } else {
+        const data = await response.json();
+        setTranscript(data.transcript);
+      }
+    } catch (err) {
+      setError("Network error. Please try again later.");
+    } finally {
       setLoading(false);
-      // setIsRateLimited(true); // Uncomment to simulate rate limiting
-    }, 1500);
+    }
   };
 
   return (
@@ -82,6 +97,16 @@ export default function YouTubeUrlForm() {
         {isRateLimited && (
           <div className="mt-2 text-yellow-600 text-xs w-full text-left">
             Too many requests. Please wait before submitting again.
+          </div>
+        )}
+        {transcript && (
+          <div className="mt-6 w-full bg-gray-50 rounded-lg p-4 text-gray-800 text-sm whitespace-pre-line border border-gray-200">
+            <strong>Transcript:</strong>
+            <ul className="list-disc pl-5 mt-2">
+              {transcript.map((line, idx) => (
+                <li key={idx}>{line}</li>
+              ))}
+            </ul>
           </div>
         )}
       </form>
