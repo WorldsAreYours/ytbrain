@@ -3,18 +3,23 @@
 import React, { useState } from "react";
 import { API_BASE_URL } from "@/lib/api";
 
+interface TranscriptLine {
+  text: string;
+  start: number;
+  duration: number;
+}
+
 // Placeholder for a robust YouTube URL validation function
 function isValidYouTubeUrl(url: string): boolean {
-  // TODO: Implement a more robust validation
-  return /^https?:\/\/(www\.)?youtube\.com\/watch\?v=.{11}$/.test(url) ||
-         /^https?:\/\/youtu\.be\/.{11}$/.test(url);
+  // Accepts most YouTube video URLs
+  return /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/.test(url.trim());
 }
 
 export default function YouTubeUrlForm() {
   const [url, setUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [transcript, setTranscript] = useState<string[] | null>(null);
+  const [transcript, setTranscript] = useState<TranscriptLine[] | null>(null);
 
   // Placeholder for rate limiting/cooldown logic
   // TODO: Implement rate limiting prevention (e.g., cooldown timer, backend check, etc.)
@@ -50,7 +55,7 @@ export default function YouTubeUrlForm() {
         setError(data.detail || "An error occurred fetching the transcript.");
       } else {
         const data = await response.json();
-        setTranscript(data.transcript);
+        setTranscript(data.transcript as TranscriptLine[]);
       }
     } catch (err) {
       setError("Network error. Please try again later.");
@@ -104,7 +109,11 @@ export default function YouTubeUrlForm() {
             <strong>Transcript:</strong>
             <ul className="list-disc pl-5 mt-2">
               {transcript.map((line, idx) => (
-                <li key={idx}>{line}</li>
+                <li key={idx}>
+                  {line.text}
+                  {/* Optionally show timestamps: */}
+                  {/* <span className="text-gray-400 ml-2">({line.start}s, {line.duration}s)</span> */}
+                </li>
               ))}
             </ul>
           </div>
